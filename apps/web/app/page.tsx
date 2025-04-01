@@ -1,5 +1,4 @@
 import { Button } from "@workspace/ui/components/button";
-import { useQuery } from "@workspace/libraries/tanstack-query";
 
 export default function Page() {
   return (
