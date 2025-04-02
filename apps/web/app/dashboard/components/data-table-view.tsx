@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Text } from "lucide-react";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import axios from "axios";
+import { DataTableColumnHeader } from "@/components/table/data-column-header";
 
 const searchParams = {
   name: parseAsString.withDefault(""),
@@ -52,7 +53,9 @@ export function DataTableView() {
       {
         id: "name",
         accessorKey: "name",
-        header: "Name",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={"Name"} />
+        ),
         meta: {
           label: "Name",
           placeholder: "Search...",
@@ -60,11 +63,14 @@ export function DataTableView() {
           icon: Text,
         },
         enableColumnFilter: true,
+        enableSorting: true,
       },
       {
         id: "gender",
         accessorKey: "gender",
-        header: "Gender",
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={"Gender"} />
+        ),
         cell: ({ row }) => (
           <span className="capitalize">{row.original.gender}</span>
         ),
@@ -77,6 +83,7 @@ export function DataTableView() {
           })),
         },
         enableColumnFilter: true,
+        enableSorting: true,
       },
     ],
     throttleMs: 1000,
