@@ -1,0 +1,6 @@
+{
+  "$schema": "https://github.com/shirshak90/monorepo-starter/registry.json",
+  "name": "acme",
+  "homepage": "https://acme.com",
+  "items": []
+}
