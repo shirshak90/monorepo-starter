@@ -1,4 +1,4 @@
-import { DataTableColumnHeader } from "@/components/table/data-column-header";
+import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
 import { Text } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 

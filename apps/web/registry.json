@@ -1,18 +1,86 @@
 {
   "$schema": "https://raw.githubusercontent.com/shirshak90/monorepo-starter/refs/heads/master/apps/web/registry.json",
   "name": "workspace",
-  "homepage": "https://acme.com",
+  "homepage": "https://github.com",
   "items": [
     {
-      "name": "hello-world",
+      "name": "data-table",
       "type": "registry:component",
-      "title": "Hello World",
-      "description": "A simple hello world component",
-      "registryDependencies": ["button"],
+      "title": "Data Table",
+      "description": "A reusable data table.",
+      "registryDependencies": [
+        "skeleton",
+        "dropdown-menu",
+        "button",
+        "command",
+        "popover",
+        "badge",
+        "separator",
+        "select",
+        "input",
+        "table"
+      ],
+      "dependencies": ["@tanstack/react-table", "lucide-react", "zod", "nuqs"],
       "files": [
         {
-          "path": "components/hello-world.tsx",
-          "type": "registry:component"
+          "path": "components/table/skeleton/data-table-pagination-skeleton.tsx",
+          "type": "registry:component",
+          "target": "components/table/skeleton/data-table-pagination-skeleton.tsx"
+        },
+        {
+          "path": "components/table/skeleton/data-table-toolbar-skeleton.tsx",
+          "type": "registry:component",
+          "target": "components/table/skeleton/data-table-toolbar-skeleton.tsx"
+        },
+        {
+          "path": "components/table/config.ts",
+          "type": "registry:component",
+          "target": "components/table/config.ts"
+        },
+        {
+          "path": "components/table/data-table-column-header.tsx",
+          "type": "registry:component",
+          "target": "components/table/data-table-column-header.tsx"
+        },
+        {
+          "path": "components/table/data-table-faceted-filter.tsx",
+          "type": "registry:component",
+          "target": "components/table/data-table-faceted-filter.tsx"
+        },
+        {
+          "path": "components/table/data-table-pagination.tsx",
+          "type": "registry:component",
+          "target": "components/table/data-table-pagination.tsx"
+        },
+        {
+          "path": "components/table/data-table-toolbar.tsx",
+          "type": "registry:component",
+          "target": "components/table/data-table-toolbar.tsx"
+        },
+        {
+          "path": "components/table/data-table-view-options.tsx",
+          "type": "registry:component",
+          "target": "components/table/data-table-view-options.tsx"
+        },
+        {
+          "path": "components/table/data-table-wrapper.tsx",
+          "type": "registry:component",
+          "target": "components/table/data-table-wrapper.tsx"
+        },
+        {
+          "path": "components/table/data-table.tsx",
+          "type": "registry:component",
+          "target": "components/table/data-table.tsx"
+        },
+        {
+          "path": "components/table/parsers.ts",
+          "type": "registry:component",
+          "target": "components/table/parsers.ts"
+        },
+        {
+          "path": "components/table/types.ts",
+          "type": "registry:component",
+          "target": "components/table/types.ts"
         }
       ]
     }
