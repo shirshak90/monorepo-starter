@@ -1,6 +1,6 @@
 "use client";
 
-import type { Option } from "@/types/data-table";
+import type { Option } from "@/components/table/types";
 import { Separator } from "@radix-ui/react-separator";
 import type { Column } from "@tanstack/react-table";
 import { Button } from "@workspace/ui/components/button";

@@ -88,6 +88,7 @@ export function DataTableView() {
     ],
     throttleMs: 1000,
     pageCount,
+    clearOnDefault: true,
   });
 
   return (
