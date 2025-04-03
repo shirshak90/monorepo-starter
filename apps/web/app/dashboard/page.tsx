@@ -1,4 +1,4 @@
-import { DataTableView } from "./components/data-table-view";
+import { DataTableView } from "./components/dashboard-table/data-table-view";
 
 export default function Page() {
   return (

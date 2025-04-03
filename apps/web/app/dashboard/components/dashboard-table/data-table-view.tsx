@@ -4,10 +4,11 @@ import { DataTable } from "@/components/table/data-table";
 import { DataTableToolbar } from "@/components/table/data-table-toolbar";
 import { useDataTable } from "@/hooks/use-data-table";
 import { useQuery } from "@tanstack/react-query";
-import { Text } from "lucide-react";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import axios from "axios";
-import { DataTableColumnHeader } from "@/components/table/data-column-header";
+import { getDashboardColumns } from "./columns";
+import { DataTableWrapper } from "@/components/table/data-table-wrapper";
+import { Option } from "@/components/table/types";
 
 const searchParams = {
   name: parseAsString.withDefault(""),
@@ -15,6 +16,17 @@ const searchParams = {
   perPage: parseAsInteger.withDefault(10),
   gender: parseAsString.withDefault(""),
 };
+
+function getGenders() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([
+        { label: "Male", value: "male" },
+        { label: "Female", value: "female" },
+      ]);
+    }, 2000);
+  });
+}
 
 export function DataTableView() {
   const [params] = useQueryStates(searchParams);
@@ -32,6 +44,11 @@ export function DataTableView() {
       }),
   });
 
+  const { data: genderData, isLoading: isGenderLoading } = useQuery({
+    queryKey: ["genders"],
+    queryFn: getGenders,
+  });
+
   const { data: total } = useQuery({
     queryKey: ["test", params.name, params.gender],
     queryFn: () =>
@@ -42,60 +59,20 @@ export function DataTableView() {
 
   const pageCount = Math.ceil((total?.data.length ?? 0) / params.perPage);
 
-  const genderOptions = [
-    { label: "Male", value: "male" },
-    { label: "Female", value: "female" },
-  ];
-
   const { table } = useDataTable({
     data: data?.data ?? [],
-    columns: [
-      {
-        id: "name",
-        accessorKey: "name",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={"Name"} />
-        ),
-        meta: {
-          label: "Name",
-          placeholder: "Search...",
-          variant: "text",
-          icon: Text,
-        },
-        enableColumnFilter: true,
-        enableSorting: true,
-      },
-      {
-        id: "gender",
-        accessorKey: "gender",
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={"Gender"} />
-        ),
-        cell: ({ row }) => (
-          <span className="capitalize">{row.original.gender}</span>
-        ),
-        meta: {
-          label: "Gender",
-          variant: "select",
-          options: genderOptions.map((option) => ({
-            label: option.label,
-            value: option.value,
-          })),
-        },
-        enableColumnFilter: true,
-        enableSorting: true,
-      },
-    ],
+    columns: getDashboardColumns({
+      genderOptions: genderData as Option[],
+    }),
     throttleMs: 1000,
     pageCount,
     clearOnDefault: true,
   });
 
   return (
-    <div>
-      <DataTable table={table}>
-        <DataTableToolbar table={table}></DataTableToolbar>
-      </DataTable>
-    </div>
+    <DataTableWrapper>
+      <DataTableToolbar table={table} isLoading={isGenderLoading} />
+      <DataTable table={table} isLoading={isLoading} />
+    </DataTableWrapper>
   );
 }
