@@ -1,6 +1,20 @@
 {
-  "$schema": "https://github.com/shirshak90/monorepo-starter/registry.json",
-  "name": "acme",
+  "$schema": "https://raw.githubusercontent.com/shirshak90/monorepo-starter/refs/heads/master/apps/web/registry.json",
+  "name": "workspace",
   "homepage": "https://acme.com",
-  "items": []
+  "items": [
+    {
+      "name": "hello-world",
+      "type": "registry:component",
+      "title": "Hello World",
+      "description": "A simple hello world component",
+      "registryDependencies": ["button"],
+      "files": [
+        {
+          "path": "components/hello-world.tsx",
+          "type": "registry:component"
+        }
+      ]
+    }
+  ]
 }
