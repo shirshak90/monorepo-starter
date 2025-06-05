@@ -8,7 +8,7 @@ import { getFiltersStateParser } from "./parsers";
 import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
 import { X } from "lucide-react";
-import { DataTableFacetedFilter } from "./data-table-advance-faceted-filter";
+import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { cn } from "@workspace/ui/lib/utils";
 import { DataTableViewOptions } from "./data-table-view-options";
 
