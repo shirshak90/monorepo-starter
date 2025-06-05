@@ -11,4 +11,5 @@ export const dataTableConfig = {
     "select",
     "multiSelect",
   ] as const,
+  filterOperators: ["like", "eq", "gt", "lt", "gte", "lte"] as const,
 };

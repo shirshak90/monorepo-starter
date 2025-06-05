@@ -1,7 +1,6 @@
 "use client";
 
 import { DataTable } from "@/components/table/data-table";
-import { DataTableToolbar } from "@/components/table/data-table-toolbar";
 import { useDataTable } from "@/hooks/use-data-table";
 import { useQuery } from "@tanstack/react-query";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
@@ -9,7 +8,9 @@ import axios from "axios";
 import { getDashboardColumns } from "./columns";
 import { DataTableWrapper } from "@/components/table/data-table-wrapper";
 import { Option } from "@/components/table/types";
-import { DataTableAdvanceFilter } from "@/components/table/data-table-advance-filter";
+import { DataTableFilter } from "@/components/table/data-table-filter";
+import { DataTableToolbarSkeleton } from "@/components/table/skeleton/data-table-toolbar-skeleton";
+import { DataTableSkeleton } from "@/components/table/skeleton/data-table-skeleton";
 
 const searchParams = {
   name: parseAsString.withDefault(""),
@@ -60,7 +61,7 @@ export function DataTableView() {
 
   const pageCount = Math.ceil((total?.data.length ?? 0) / params.perPage);
 
-  const { table } = useDataTable({
+  const { table, shallow, debounceMs, throttleMs } = useDataTable({
     data: data?.data ?? [],
     columns: getDashboardColumns({
       genderOptions: genderData as Option[],
@@ -70,11 +71,24 @@ export function DataTableView() {
     clearOnDefault: true,
   });
 
+  if (isGenderLoading) {
+    return (
+      <div className="space-y-2">
+        <DataTableToolbarSkeleton />
+        <DataTableSkeleton columnCount={table.getVisibleFlatColumns().length} />
+      </div>
+    );
+  }
+
   return (
     <DataTableWrapper>
-      <DataTableToolbar table={table} isLoading={isGenderLoading} />
-      <DataTableAdvanceFilter table={table} />
-      <DataTable table={table} isLoading={isLoading} />
+      <DataTableFilter
+        table={table}
+        shallow={shallow}
+        debounceMs={debounceMs}
+        throttleMs={throttleMs}
+      />
+      <DataTable table={table} isLoading={isLoading || isGenderLoading} />
     </DataTableWrapper>
   );
 }

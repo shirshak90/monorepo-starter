@@ -1,31 +1,33 @@
-import { Column, Table } from "@tanstack/react-table";
-import { PopoverContent } from "@workspace/ui/components/popover";
-import { useQueryState } from "nuqs";
+"use client";
+
 import React from "react";
+import { Column, Table } from "@tanstack/react-table";
+import { useQueryState } from "nuqs";
 import { ExtendedColumnFilter } from "./types";
 import { getFiltersStateParser } from "./parsers";
 import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
 import { X } from "lucide-react";
+import { DataTableFacetedFilter } from "./data-table-advance-faceted-filter";
+import { cn } from "@workspace/ui/lib/utils";
+import { DataTableViewOptions } from "./data-table-view-options";
 
 const FILTERS_KEY = "filters";
 const DEBOUNCE_MS = 300;
 const THROTTLE_MS = 50;
 
-interface DataTableFilterListProps<TData>
-  extends React.ComponentProps<typeof PopoverContent> {
+interface DataTableFilterListProps<TData> {
   table: Table<TData>;
   debounceMs?: number;
   throttleMs?: number;
   shallow?: boolean;
 }
 
-export function DataTableAdvanceFilter<TData>({
+export function DataTableFilter<TData>({
   table,
   debounceMs = DEBOUNCE_MS,
   throttleMs = THROTTLE_MS,
   shallow = true,
-  ...props
 }: DataTableFilterListProps<TData>) {
   const columns = React.useMemo(() => {
     return table
@@ -53,15 +55,15 @@ export function DataTableAdvanceFilter<TData>({
     debouncedSetFilters((prevFilters) => {
       const existingFilter = prevFilters.find((filter) => filter.id === id);
 
+      table.resetPagination();
+
       if (!existingFilter) {
-        // Add new filter
         return [
           ...prevFilters,
           { id, ...updates } as ExtendedColumnFilter<TData>,
         ];
       }
 
-      // Update existing filter
       return prevFilters.map((filter) =>
         filter.id === id
           ? ({ ...filter, ...updates } as ExtendedColumnFilter<TData>)
@@ -72,35 +74,43 @@ export function DataTableAdvanceFilter<TData>({
 
   const onFilterRemove = (id: string) => {
     const updatedFilters = filters.filter((filter) => filter.id !== id);
-    void setFilters(updatedFilters);
+    setFilters(updatedFilters);
+    table.resetPagination();
   };
 
   const onFiltersReset = () => {
     setFilters(null);
-    table.resetColumnFilters();
+    table.resetPagination();
   };
 
   return (
-    <div className="flex flex-1 flex-wrap items-center gap-2">
-      {columns.map((column) => (
-        <DataTableToolbarFilter
-          key={column.id}
-          column={column}
-          onFilterUpdate={onFilterUpdate}
-        />
-      ))}
-      {!!filters.length && (
-        <Button
-          aria-label="Reset filters"
-          variant="outline"
-          size="sm"
-          className="border-dashed"
-          onClick={onFiltersReset}
-        >
-          <X />
-          Reset
-        </Button>
-      )}
+    <div className="flex">
+      <div className="flex flex-1 flex-wrap items-center gap-2">
+        {columns.map((column) => (
+          <DataTableToolbarFilter
+            key={column.id}
+            column={column}
+            filters={filters}
+            onFilterUpdate={onFilterUpdate}
+            onFilterRemove={onFilterRemove}
+          />
+        ))}
+        {!!filters.length && (
+          <Button
+            aria-label="Reset filters"
+            variant="outline"
+            size="sm"
+            className="border-dashed"
+            onClick={onFiltersReset}
+          >
+            <X />
+            Reset
+          </Button>
+        )}
+      </div>
+      <div className="flex items-center gap-2">
+        <DataTableViewOptions table={table} />
+      </div>
     </div>
   );
 }
@@ -112,12 +122,14 @@ interface DataTableToolbarFilterProps<TData> {
     filterId: string,
     updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>
   ) => void;
+  onFilterRemove: (filterId: string) => void;
 }
 
 function DataTableToolbarFilter<TData>({
   column,
   filters,
   onFilterUpdate,
+  onFilterRemove,
 }: DataTableToolbarFilterProps<TData>) {
   const columnMeta = column.columnDef.meta;
 
@@ -130,7 +142,7 @@ function DataTableToolbarFilter<TData>({
       return (
         <Input
           placeholder={columnMeta.placeholder ?? columnMeta.label}
-          defaultValue={match?.value ?? ""}
+          value={match?.value ?? ""}
           onChange={(e) =>
             onFilterUpdate(column.id, {
               id: column.id as Extract<keyof TData, string>,
@@ -141,8 +153,43 @@ function DataTableToolbarFilter<TData>({
           className="h-8 w-40 lg:w-56 focus-visible:ring-0"
         />
       );
+    case "number":
+      return (
+        <div className="relative">
+          <Input
+            type="number"
+            inputMode="numeric"
+            placeholder={columnMeta.placeholder ?? columnMeta.label}
+            value={match?.value ?? ""}
+            onChange={(e) =>
+              onFilterUpdate(column.id, {
+                id: column.id as Extract<keyof TData, string>,
+                value: e.target.value,
+                operator: columnMeta.operator?.[0],
+              })
+            }
+            className={cn("h-8 w-[120px]", columnMeta.unit && "pr-8")}
+          />
+          {columnMeta.unit && (
+            <span className="absolute top-0 right-0 bottom-0 flex items-center rounded-r-md bg-accent px-2 text-muted-foreground text-sm">
+              {columnMeta.unit}
+            </span>
+          )}
+        </div>
+      );
     case "select":
-      return null;
+    case "multiSelect":
+      return (
+        <DataTableFacetedFilter
+          title={columnMeta.label}
+          column={column}
+          options={columnMeta.options ?? []}
+          filters={filters}
+          multiple={columnMeta.variant === "multiSelect"}
+          onFilterUpdate={onFilterUpdate}
+          onFilterRemove={onFilterRemove}
+        />
+      );
     default:
       return null;
   }

@@ -1,77 +1,75 @@
-"use client";
-
-import type { Option } from "@/components/table/types";
-import type { Column } from "@tanstack/react-table";
-import { Button } from "@workspace/ui/components/button";
-import {
-  CommandInput,
-  CommandList,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandSeparator,
-  Command,
-} from "@workspace/ui/components/command";
+import { Column } from "@tanstack/react-table";
+import { ExtendedColumnFilter, Option } from "./types";
+import React from "react";
 import {
   Popover,
-  PopoverTrigger,
   PopoverContent,
+  PopoverTrigger,
 } from "@workspace/ui/components/popover";
-import { cn } from "@workspace/ui/lib/utils";
+import { Button } from "@workspace/ui/components/button";
 import { Check, PlusCircle, XCircle } from "lucide-react";
-import { Badge } from "@workspace/ui/components/badge";
-
-import * as React from "react";
 import { Separator } from "@workspace/ui/components/separator";
+import { Badge } from "@workspace/ui/components/badge";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@workspace/ui/components/command";
+import { cn } from "@workspace/ui/lib/utils";
 
 interface DataTableFacetedFilterProps<TData, TValue> {
-  column?: Column<TData, TValue>;
+  column: Column<TData, TValue>;
   title?: string;
+  filters?: ExtendedColumnFilter<TData>[];
+  onFilterUpdate: (
+    filterId: string,
+    updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>
+  ) => void;
+  onFilterRemove: (filterId: string) => void;
   options: Option[];
   multiple?: boolean;
 }
 
 export function DataTableFacetedFilter<TData, TValue>({
   column,
-  title,
+  filters,
   options,
-  multiple,
+  title,
+  onFilterUpdate,
+  onFilterRemove,
 }: DataTableFacetedFilterProps<TData, TValue>) {
   const [open, setOpen] = React.useState(false);
 
-  const columnFilterValue = column?.getFilterValue();
-  const selectedValues = new Set(
-    Array.isArray(columnFilterValue) ? columnFilterValue : []
-  );
+  const match = filters?.find((filter) => filter.id === column.id);
 
-  const onItemSelect = React.useCallback(
-    (option: Option, isSelected: boolean) => {
-      if (!column) return;
+  const onReset = () => {
+    onFilterRemove(column.id);
+  };
 
-      if (multiple) {
-        const newSelectedValues = new Set(selectedValues);
-        if (isSelected) {
-          newSelectedValues.delete(option.value);
-        } else {
-          newSelectedValues.add(option.value);
-        }
-        const filterValues = Array.from(newSelectedValues);
-        column.setFilterValue(filterValues.length ? filterValues : undefined);
-      } else {
-        column.setFilterValue(isSelected ? undefined : [option.value]);
-        setOpen(false);
-      }
-    },
-    [column, multiple, selectedValues]
-  );
+  const selectedValues = new Set(match?.value || []);
 
-  const onReset = React.useCallback(
-    (event?: React.MouseEvent) => {
-      event?.stopPropagation();
-      column?.setFilterValue(undefined);
-    },
-    [column]
-  );
+  const onItemSelect = (option: Option, isSelected: boolean) => {
+    if (!column) return;
+
+    if (isSelected) {
+      selectedValues.delete(option.value);
+    } else {
+      selectedValues.add(option.value);
+    }
+
+    const filterValues = Array.from(selectedValues);
+    column.setFilterValue(filterValues.length ? filterValues : undefined);
+
+    onFilterUpdate(column.id, {
+      id: column.id as Extract<keyof TData, string>,
+      value: filterValues,
+      operator: column.columnDef.meta?.operator?.[0],
+    });
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
