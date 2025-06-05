@@ -42,7 +42,7 @@ export function getDashboardColumns({
       ),
       meta: {
         label: "Gender",
-        variant: "select",
+        variant: "multiSelect",
         options: genderOptions?.map((option) => ({
           label: option.label,
           value: option.value,

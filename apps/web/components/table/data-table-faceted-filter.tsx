@@ -41,6 +41,7 @@ export function DataTableFacetedFilter<TData, TValue>({
   title,
   onFilterUpdate,
   onFilterRemove,
+  multiple,
 }: DataTableFacetedFilterProps<TData, TValue>) {
   const [open, setOpen] = React.useState(false);
 
@@ -50,18 +51,30 @@ export function DataTableFacetedFilter<TData, TValue>({
     onFilterRemove(column.id);
   };
 
-  const selectedValues = new Set(match?.value || []);
+  const selectedValues = new Set(
+    Array.isArray(match?.value)
+      ? match?.value
+      : match?.value
+        ? [match.value]
+        : []
+  );
 
   const onItemSelect = (option: Option, isSelected: boolean) => {
     if (!column) return;
 
-    if (isSelected) {
-      selectedValues.delete(option.value);
+    let filterValues: string[] = [];
+
+    if (multiple) {
+      if (isSelected) {
+        selectedValues.delete(option.value);
+      } else {
+        selectedValues.add(option.value);
+      }
+      filterValues = Array.from(selectedValues);
     } else {
-      selectedValues.add(option.value);
+      filterValues = isSelected ? [] : [option.value];
     }
 
-    const filterValues = Array.from(selectedValues);
     column.setFilterValue(filterValues.length ? filterValues : undefined);
 
     onFilterUpdate(column.id, {

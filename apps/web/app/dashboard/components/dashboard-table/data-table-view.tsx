@@ -25,6 +25,7 @@ function getGenders() {
       resolve([
         { label: "Male", value: "male" },
         { label: "Female", value: "female" },
+        { label: "Others", value: "others" },
       ]);
     }, 2000);
   });
