@@ -4,6 +4,9 @@ import { useQueryState } from "nuqs";
 import React from "react";
 import { ExtendedColumnFilter } from "./types";
 import { getFiltersStateParser } from "./parsers";
+import { Input } from "@workspace/ui/components/input";
+import { Button } from "@workspace/ui/components/button";
+import { X } from "lucide-react";
 
 const FILTERS_KEY = "filters";
 const DEBOUNCE_MS = 300;
@@ -44,36 +47,60 @@ export function DataTableAdvanceFilter<TData>({
   const debouncedSetFilters = setFilters;
 
   const onFilterUpdate = (
-    filterId: string,
-    updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>
+    id: string,
+    updates: Partial<ExtendedColumnFilter<TData>>
   ) => {
     debouncedSetFilters((prevFilters) => {
-      const updatedFilters = prevFilters.map((filter) => {
-        if (filter.filterId === filterId) {
-          return { ...filter, ...updates } as ExtendedColumnFilter<TData>;
-        }
-        return filter;
-      });
-      return updatedFilters;
+      const existingFilter = prevFilters.find((filter) => filter.id === id);
+
+      if (!existingFilter) {
+        // Add new filter
+        return [
+          ...prevFilters,
+          { id, ...updates } as ExtendedColumnFilter<TData>,
+        ];
+      }
+
+      // Update existing filter
+      return prevFilters.map((filter) =>
+        filter.id === id
+          ? ({ ...filter, ...updates } as ExtendedColumnFilter<TData>)
+          : filter
+      );
     });
   };
 
-  const onFilterRemove = (filterId: string) => {
-    const updatedFilters = filters.filter(
-      (filter) => filter.filterId !== filterId
-    );
+  const onFilterRemove = (id: string) => {
+    const updatedFilters = filters.filter((filter) => filter.id !== id);
     void setFilters(updatedFilters);
   };
 
   const onFiltersReset = () => {
     setFilters(null);
+    table.resetColumnFilters();
   };
 
   return (
-    <div>
+    <div className="flex flex-1 flex-wrap items-center gap-2">
       {columns.map((column) => (
-        <DataTableToolbarFilter key={column.id} column={column} />
+        <DataTableToolbarFilter
+          key={column.id}
+          column={column}
+          onFilterUpdate={onFilterUpdate}
+        />
       ))}
+      {!!filters.length && (
+        <Button
+          aria-label="Reset filters"
+          variant="outline"
+          size="sm"
+          className="border-dashed"
+          onClick={onFiltersReset}
+        >
+          <X />
+          Reset
+        </Button>
+      )}
     </div>
   );
 }
@@ -81,19 +108,39 @@ export function DataTableAdvanceFilter<TData>({
 interface DataTableToolbarFilterProps<TData> {
   column: Column<TData>;
   filters?: ExtendedColumnFilter<TData>[];
+  onFilterUpdate: (
+    filterId: string,
+    updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>
+  ) => void;
 }
 
 function DataTableToolbarFilter<TData>({
   column,
   filters,
+  onFilterUpdate,
 }: DataTableToolbarFilterProps<TData>) {
   const columnMeta = column.columnDef.meta;
+
+  const match = filters?.find((filter) => filter.id === column.id);
 
   if (!columnMeta?.variant) return null;
 
   switch (columnMeta.variant) {
     case "text":
-      return null;
+      return (
+        <Input
+          placeholder={columnMeta.placeholder ?? columnMeta.label}
+          defaultValue={match?.value ?? ""}
+          onChange={(e) =>
+            onFilterUpdate(column.id, {
+              id: column.id as Extract<keyof TData, string>,
+              value: e.target.value,
+              operator: columnMeta.operator?.[0],
+            })
+          }
+          className="h-8 w-40 lg:w-56 focus-visible:ring-0"
+        />
+      );
     case "select":
       return null;
     default:

@@ -1,7 +1,6 @@
 import { createParser } from "nuqs/server";
 import { z } from "zod";
 
-import { dataTableConfig } from "@/components/table/config";
 import {
   ExtendedColumnFilter,
   ExtendedColumnSort,
@@ -45,9 +44,7 @@ export const getSortingStateParser = <TData>(
 const filterItemSchema = z.object({
   id: z.string(),
   value: z.union([z.string(), z.array(z.string())]),
-  variant: z.enum(dataTableConfig.filterVariants),
-  operator: z.enum(["like"]),
-  filterId: z.string(),
+  operator: z.enum(["like", "eq", "gt", "lt", "gte", "lte"]),
 });
 
 export type FilterItemSchema = z.infer<typeof filterItemSchema>;
@@ -85,7 +82,6 @@ export const getFiltersStateParser = <TData>(
         (filter, index) =>
           filter.id === b[index]?.id &&
           filter.value === b[index]?.value &&
-          filter.variant === b[index]?.variant &&
           filter.operator === b[index]?.operator
       ),
   });

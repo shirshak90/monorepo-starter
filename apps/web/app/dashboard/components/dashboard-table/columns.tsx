@@ -47,7 +47,7 @@ export function getDashboardColumns({
           label: option.label,
           value: option.value,
         })),
-        operator: ["eq"],
+        operator: ["like"],
       },
       enableColumnFilter: true,
       enableSorting: true,
