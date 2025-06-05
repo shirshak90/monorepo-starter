@@ -9,6 +9,7 @@ import axios from "axios";
 import { getDashboardColumns } from "./columns";
 import { DataTableWrapper } from "@/components/table/data-table-wrapper";
 import { Option } from "@/components/table/types";
+import { DataTableAdvanceFilter } from "@/components/table/data-table-advance-filter";
 
 const searchParams = {
   name: parseAsString.withDefault(""),
@@ -72,6 +73,7 @@ export function DataTableView() {
   return (
     <DataTableWrapper>
       <DataTableToolbar table={table} isLoading={isGenderLoading} />
+      <DataTableAdvanceFilter table={table} />
       <DataTable table={table} isLoading={isLoading} />
     </DataTableWrapper>
   );

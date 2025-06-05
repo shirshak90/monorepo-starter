@@ -9,6 +9,7 @@ declare module "@tanstack/react-table" {
     variant?: FilterVariant;
     options?: Option[];
     range?: [number, number];
+    operator?: ["like" | "eq" | "gt" | "lt" | "gte" | "lte"];
     unit?: string;
     icon?: React.FC<React.SVGProps<SVGSVGElement>>;
   }

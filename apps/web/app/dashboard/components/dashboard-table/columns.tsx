@@ -6,9 +6,14 @@ interface Props {
   genderOptions: { value: string; label: string }[];
 }
 
+interface Column {
+  name: string;
+  gender: string;
+}
+
 export function getDashboardColumns({
   genderOptions,
-}: Props): ColumnDef<any>[] {
+}: Props): ColumnDef<Column>[] {
   return [
     {
       id: "name",
@@ -21,6 +26,7 @@ export function getDashboardColumns({
         placeholder: "Search...",
         variant: "text",
         icon: Text,
+        operator: ["like"],
       },
       enableColumnFilter: true,
       enableSorting: true,
@@ -41,6 +47,7 @@ export function getDashboardColumns({
           label: option.label,
           value: option.value,
         })),
+        operator: ["eq"],
       },
       enableColumnFilter: true,
       enableSorting: true,
